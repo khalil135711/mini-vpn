@@ -1,0 +1,22 @@
+# Mini VPN: WireGuard + web GUI (wg-easy)
+# Start:  docker compose up -d
+# HTTPS:  docker compose -f docker-compose.yml -f docker-compose.https.yml up -d
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:15
+    container_name: wg-easy
+    restart: unless-stopped
+    environment:
+      - INSECURE=${INSECURE:-true}   # plain-HTTP login; set false behind HTTPS
+    volumes:
+      - ./wg-data:/etc/wireguard
+      - /lib/modules:/lib/modules:ro
+    ports:
+      - "${WG_PORT:-51820}:51820/udp"            # WireGuard tunnel
+      - "127.0.0.1:${GUI_PORT:-51821}:51821/tcp" # GUI, localhost only (use SSH tunnel)
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1

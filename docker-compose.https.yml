@@ -1,0 +1,24 @@
+# Override: puts the GUI behind Caddy with automatic HTTPS (Let's Encrypt)
+services:
+  wg-easy:
+    environment:
+      - INSECURE=false
+  caddy:
+    image: caddy:2
+    container_name: vpn-caddy
+    restart: unless-stopped
+    depends_on:
+      - wg-easy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - VPN_DOMAIN=${VPN_DOMAIN:?Set VPN_DOMAIN in .env}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
